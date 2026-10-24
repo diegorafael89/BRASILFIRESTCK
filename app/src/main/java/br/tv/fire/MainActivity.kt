@@ -1,6 +1,7 @@
 package br.tv.fire
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.View
@@ -23,6 +24,7 @@ data class Channel(val name: String, val group: String, val url: String)
 class MainActivity : Activity() {
 
     // Lista pública mantida pelo projeto iptv-org (GitHub) - canais do Brasil
+    private val GLOBO = "globoplay://ao-vivo"
     private val playlistUrl = "https://iptv-org.github.io/iptv/countries/br.m3u"
 
     private lateinit var panel: View
@@ -56,7 +58,12 @@ class MainActivity : Activity() {
                 }
             })
         }
+        // Globo Nordeste (Globoplay) fixo no topo e aberto como canal principal
+        channels.add(Channel("\u2605 Globo Nordeste (Globoplay)", "", GLOBO))
+        names.add("\u2605 Globo Nordeste (Globoplay)")
+        adapter.notifyDataSetChanged()
         loadChannels()
+        if (savedInstanceState == null) startActivity(Intent(this, GloboActivity::class.java))
     }
 
     private fun loadChannels() {
@@ -119,6 +126,7 @@ class MainActivity : Activity() {
     } catch (e: Exception) { false }
 
     private fun play(ch: Channel) {
+        if (ch.url == GLOBO) { startActivity(Intent(this, GloboActivity::class.java)); return }
         player?.apply { setMediaItem(MediaItem.fromUri(ch.url)); prepare(); playWhenReady = true }
         panel.visibility = View.GONE
     }
